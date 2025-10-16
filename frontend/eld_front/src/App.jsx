@@ -3,7 +3,7 @@ import TripForm from "./components/TripForm";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
+    <div className="min-h-screen bg-gray-300 text-gray-900 flex flex-col">
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md p-6 rounded-b-2xl">
         <div className="max-w-6xl mx-auto">
@@ -20,9 +20,15 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-6 border-t mt-8">
-        © {new Date().getFullYear()} Ezra Joseph.
-      </footer>
+     <footer className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-center text-sm py-6 mt-8 rounded-t-2xl shadow-inner">
+      <div className="max-w-6xl mx-auto px-4">
+        <p>
+          © {new Date().getFullYear()}{" "}
+          <span className="text-white font-semibold">Ezra Joseph</span>
+        </p>
+      </div>
+     </footer>
+
     </div>
   );
 }
