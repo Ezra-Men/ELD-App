@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 from geopy.distance import distance as geo_distance
 from collections import defaultdict
 from decouple import config
-
+import time
 #views
 @api_view(['POST'])
 def create_trip(request):
@@ -22,16 +22,27 @@ def create_trip(request):
     print(f"DEBUG: Processing locations - Current: {current_location}, Pickup: {pickup_location}, Dropoff: {dropoff_location}")
 
     def geocode(location):
-        url = f'https://nominatim.openstreetmap.org/search?q={location}&format=json'
-        headers = {'User-Agent': 'TripPlanner/1.0'}
-        response = requests.get(url, headers=headers)
+        if "," not in location:
+            location = f"{location}, USA"
+
+        url = f"https://nominatim.openstreetmap.org/search?q={location}&format=json&limit=1"
+        headers = {"User-Agent": "EzraTripPlannerAssessment/1.0 (contact: example@example.com)"}
+        response = requests.get(url, headers=headers, timeout=10)
+
+    # Respect Nominatim rate limit (1 request/sec)
+        time.sleep(1.1)
+
+        if response.status_code != 200:
+            print(f"Geocode failed for {location}: {response.status_code}")
+            return None
+
         results = response.json()
-        print(f"DEBUG: Geocoding '{location}': {len(results)} results")
         if results:
-            lat, lon = float(results[0]['lat']), float(results[0]['lon'])
-            print(f"DEBUG: Coords for {location}: ({lat}, {lon})")
+            lat, lon = float(results[0]["lat"]), float(results[0]["lon"])
             return lat, lon
+        print(f"Geocode returned empty for {location}")
         return None
+
 
     current_coords = geocode(current_location)
     pickup_coords = geocode(pickup_location)
