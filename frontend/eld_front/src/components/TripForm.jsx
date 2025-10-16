@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import RouteMap from "./RouteMap";
 import LogViewer from "./LogViewer";
+import { motion } from "framer-motion";
 
-const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g. http://localhost:8000
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 export default function TripForm() {
   const [currentLocation, setCurrentLocation] = useState("");
@@ -42,17 +43,16 @@ export default function TripForm() {
           data.error ||
           `Unexpected error (${res.status})`;
 
+        // Friendly fallback message
         if (message.toLowerCase().includes("routable point")) {
           message =
             "Couldn't find a driving route near one of your locations. Try specifying the city and country (e.g. 'Dallas, TX, USA').";
-          }
+        }
 
         throw new Error(message);
-}
-
+      }
 
       const data = await res.json();
-      // expected keys: route { coordinates: [[lon,lat],...], stops: [...], distance, duration }, eld_logs [{day, image_url}]
       setRoute(data.route || null);
       setEldLogs(data.eld_logs || []);
     } catch (err) {
@@ -64,55 +64,130 @@ export default function TripForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="md:col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Current location</label>
-          <input value={currentLocation} onChange={(e)=>setCurrentLocation(e.target.value)} placeholder="e.g. Lagos, Nigeria" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        </div>
+    <div className="space-y-8">
+      {/* Input Form */}
+      <motion.form
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white p-8 rounded-2xl shadow-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {[
+          {
+            label: "Current Location",
+            value: currentLocation,
+            set: setCurrentLocation,
+            placeholder: "Dallas, TX, USA",
+          },
+          {
+            label: "Pickup Location",
+            value: pickupLocation,
+            set: setPickupLocation,
+            placeholder: "New York, NY, USA",
+          },
+          {
+            label: "Dropoff Location",
+            value: dropoffLocation,
+            set: setDropoffLocation,
+            placeholder: "Los Angeles, CA, USA",
+          },
+          {
+            label: "Cycle Hours Used (hrs)",
+            value: cycleHours,
+            set: setCycleHours,
+            type: "number",
+            placeholder: "e.g. 7",
+          },
+        ].map((f, i) => (
+          <div key={i}>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              {f.label}
+            </label>
+            <input
+              type={f.type || "text"}
+              value={f.value}
+              onChange={(e) => f.set(e.target.value)}
+              placeholder={f.placeholder}
+              className="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-gray-700 p-2.5 shadow-sm"
+            />
+          </div>
+        ))}
 
-        <div className="md:col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Pickup location</label>
-          <input value={pickupLocation} onChange={(e)=>setPickupLocation(e.target.value)} placeholder="Pickup address / city" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        </div>
-
-        <div className="md:col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Dropoff location</label>
-          <input value={dropoffLocation} onChange={(e)=>setDropoffLocation(e.target.value)} placeholder="Dropoff address / city" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        </div>
-
-        <div className="md:col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Cycle hours used (hrs)</label>
-          <input type="number" value={cycleHours} onChange={(e)=>setCycleHours(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        </div>
-
-        <div className="md:col-span-2 flex items-end">
-          <button type="submit" disabled={loading} className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60">
-            {loading ? "Working..." : "Plan Trip"}
+        <div className="md:col-span-2 lg:col-span-3 flex justify-center">
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium shadow-md transition-all duration-300 disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  ></path>
+                </svg>
+                Calculating Route...
+              </>
+            ) : (
+              "Plan Trip"
+            )}
           </button>
-          <div className="ml-4 text-sm text-gray-500">Allow ~10-30s for geocoding + route generation</div>
         </div>
-      </form>
+      </motion.form>
 
+      {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
           <strong>Error:</strong> {error}
         </div>
       )}
 
+      {/* Results Grid */}
       {route && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-4 rounded shadow-sm">
-            <h2 className="text-lg font-semibold mb-2">Route</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Map */}
+          <div className="bg-white p-6 rounded-2xl shadow-md">
+            <h2 className="text-lg font-semibold text-gray-700 mb-3">
+              🗺 Route Overview
+            </h2>
             <RouteMap route={route} />
-            <div className="mt-3 text-sm text-gray-600">
-              <div>Total distance: {(route.distance || 0).toFixed(1)} mi</div>
-              <div>Estimated duration: {(route.duration || 0).toFixed(1)} hrs</div>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>
+                Total Distance:{" "}
+                <span className="font-medium">
+                  {route.distance.toFixed(1)} mi
+                </span>
+              </p>
+              <p>
+                Estimated Duration:{" "}
+                <span className="font-medium">
+                  {route.duration.toFixed(1)} hrs
+                </span>
+              </p>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded shadow-sm">
-            <h2 className="text-lg font-semibold mb-2">ELD Logs</h2>
+          {/* Logs */}
+          <div className="bg-white p-6 rounded-2xl shadow-md">
+            <h2 className="text-lg font-semibold text-gray-700 mb-3">
+              📄 Driver Log Sheets
+            </h2>
             <LogViewer logs={eldLogs} />
           </div>
         </div>
