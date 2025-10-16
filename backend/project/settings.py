@@ -30,9 +30,9 @@ OPENROUTESERVICE_API_KEY = config('OPENROUTESERVICE_API_KEY')
  #SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1', 'ezrajoe.pythonanywhere.com']
 
 
 # Application definition
@@ -132,6 +132,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Production Security Settings
+
+
+
+# Only apply these when DEBUG is False
+if not config('DEBUG', default=True, cast=bool):
+    # Redirect all HTTP to HTTPS
+    SECURE_SSL_REDIRECT = True
+
+    # Tell browsers to always use HTTPS (1 year = 31536000 seconds)
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Secure cookies
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Browser security headers
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
