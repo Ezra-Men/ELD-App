@@ -33,7 +33,8 @@ export default function TripForm() {
 
       const res = await fetch(`https://ezrajoe.pythonanywhere.com/api/trips/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization" : "Token ${Token}" },
+        headers: { "Content-Type": "application/json", 
+          "Authorization": `Token ${TOKEN}`,},
         body: JSON.stringify(body),
       });
 
