@@ -30,7 +30,7 @@ export default function TripForm() {
         cycleHours: Number(cycleHours || 0),
       };
 
-      const res = await fetch(`${API_BASE}/api/trips/`, {
+      const res = await fetch(`https://ezrajoe.pythonanywhere.com/api/trips/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
