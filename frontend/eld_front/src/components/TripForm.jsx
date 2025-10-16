@@ -4,6 +4,7 @@ import LogViewer from "./LogViewer";
 import { motion } from "framer-motion";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
+const TOKEN = import.meta.env.VITE_API_TOKEN;
 
 export default function TripForm() {
   const [currentLocation, setCurrentLocation] = useState("");
@@ -32,7 +33,7 @@ export default function TripForm() {
 
       const res = await fetch(`https://ezrajoe.pythonanywhere.com/api/trips/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization" : "Token ${Token}" },
         body: JSON.stringify(body),
       });
 
